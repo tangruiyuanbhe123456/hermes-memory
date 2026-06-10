@@ -1,0 +1,76 @@
+# Dependencies
+node_modules/
+
+# Memory data (personal)
+memory/L1_working/*
+memory/L2_episodic/*
+memory/L3_semantic/*
+memory/L4_procedural/*
+memory/L5_metacognitive/*
+codex-memory/L1_working/*
+codex-memory/L2_episodic/*
+codex-memory/L3_semantic/*
+codex-memory/L4_procedural/*
+codex-memory/L5_metacognitive/*
+!memory/L1_working/.gitkeep
+!memory/L2_episodic/.gitkeep
+!memory/L3_semantic/.gitkeep
+!memory/L4_procedural/.gitkeep
+!memory/L5_metacognitive/.gitkeep
+!codex-memory/L1_working/.gitkeep
+!codex-memory/L2_episodic/.gitkeep
+!codex-memory/L3_semantic/.gitkeep
+!codex-memory/L4_procedural/.gitkeep
+!codex-memory/L5_metacognitive/.gitkeep
+
+# Database (auto-generated)
+memory.db
+
+# Secrets
+.memory-secrets/
+
+# Backups
+backups/
+
+# Logs
+logs/
+
+# Temp files
+outputs/
+work/
+edge-profile/
+covers/
+desktop-backup/
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+
+# Draft / temp scripts
+_temp.*
+_check-*
+_find-*
+_make-*
+
+# Project management files
+TASK-*.md
+PROGRESS-*.md
+HERMES-*.md
+CODEX-*.md
+PITFALLS*.md
+*.txt
+
+# Cover templates
+cover-*.html
+cover-*.png
+*-preview.png
+小红书封面*.html
+小红书画风封面*.html
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/

@@ -1,0 +1,10 @@
+
+# Hermes Agent MCP Config
+# Add this to your hermes config.yaml under mcp_servers:
+
+mcp_servers:
+  hermes-memory:
+    transport: stdio
+    command: node
+    args:
+      - D:\hermes-hermes\engine\mcp-server.cjs

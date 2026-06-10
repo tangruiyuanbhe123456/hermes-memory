@@ -1,0 +1,56 @@
+{
+  "name": "hermes-memory",
+  "version": "2.0.0",
+  "description": "Five-layer AI agent memory system with FTS5 search, MCP server, Web UI, dream consolidation, encryption, and self-reflection engine",
+  "keywords": [
+    "ai-agent",
+    "memory",
+    "agent-memory",
+    "mcp",
+    "mem0",
+    "claude-memory",
+    "fts5",
+    "sqlite",
+    "agent-skills",
+    "llm-memory"
+  ],
+  "homepage": "https://github.com/tangruiyuanbhe123456/hermes-memory",
+  "bugs": {
+    "url": "https://github.com/tangruiyuanbhe123456/hermes-memory/issues"
+  },
+  "license": "MIT",
+  "author": "Hermes Memory Team",
+  "main": "engine/memory-db.cjs",
+  "bin": {
+    "hermes-memory-dashboard": "./engine/dashboard.cjs",
+    "hermes-memory-mcp": "./engine/mcp-server.cjs",
+    "hermes-memory-dream": "./engine/dream.cjs",
+    "hermes-memory-agent-config": "./engine/agent-config.cjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tangruiyuanbhe123456/hermes-memory.git"
+  },
+  "scripts": {
+    "start": "node engine/dashboard.cjs",
+    "dream": "node engine/dream.cjs",
+    "mcp": "node engine/mcp-server.cjs",
+    "health": "node -e \"const e=require('./engine/memory-db.cjs'); console.log(JSON.stringify(e.dbHealth(),null,2))\"",
+    "test": "node test/test-memory.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.10.0",
+    "playwright": "^1.60.0",
+    "ws": "^8.21.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "engine/",
+    "agent-configs/",
+    "LICENSE",
+    "README.md",
+    "README_CN.md"
+  ]
+}

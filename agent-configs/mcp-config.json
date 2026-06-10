@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "hermes-memory": {
+      "command": "node",
+      "args": [
+        "D:\\hermes-hermes\\engine\\mcp-server.cjs"
+      ],
+      "description": "Hermes Five-Layer Memory System - Search, create, relate, and manage memories"
+    }
+  }
+}
