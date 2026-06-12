@@ -12,7 +12,8 @@ const path = require("path");
 const fs = require("fs");
 
 const MCP_SCRIPT = path.resolve(__dirname, "mcp-server.cjs");
-const HERMES_HOME = "D:\\hermes-hermes";
+const engine = require("./memory-db.cjs");
+const HERMES_HOME = engine.HERMES_HOME;
 
 // ---- 各 Agent 配置文件模板 ----
 

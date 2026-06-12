@@ -1,7 +1,7 @@
 // ============================================================
 // engine/dashboard.cjs — Web UI 仪表盘
 // Node.js 原生 http 模块，零外部依赖
-// 访问: http://127.0.0.1:3210
+// 访问: http://127.0.0.1:3211 (默认,可用 HERMES_MEMORY_PORT 覆盖)
 // ============================================================
 // KeyMemory 移植: Web UI 仪表盘
 // ============================================================
@@ -10,8 +10,18 @@ const http = require("http");
 const path = require("path");
 const engine = require("./memory-db.cjs");
 
-const PORT = 3210;
-const HOST = "127.0.0.1";
+const PORT = parseInt(process.env.HERMES_MEMORY_PORT || "3211", 10);
+const HOST = process.env.HERMES_MEMORY_HOST || "127.0.0.1";
+
+function checkPortFree(port, host) {
+  return new Promise((resolve) => {
+    const net = require("net");
+    const tester = net.createServer()
+      .once("error", (err) => resolve(err.code === "EADDRINUSE" ? false : true))
+      .once("listening", () => tester.close(() => resolve(true)))
+      .listen(port, host);
+  });
+}
 
 // ---- HTML 模板（内嵌，零外部文件） ----
 const HTML = `<!DOCTYPE html>
@@ -462,14 +472,21 @@ const server = http.createServer((req, res) => {
   }
 });
 
-server.listen(PORT, HOST, () => {
-  console.log(`\n🧠 五层记忆仪表盘已启动`);
-  console.log(`   地址: http://${HOST}:${PORT}`);
-  console.log(`   搜索: 支持中英文 FTS5 全文搜索`);
-  console.log(`   项目: 树形层级管理`);
-  console.log(`   关系: relates_to / supersedes / references`);
-  console.log(`   备份: 查看和管理备份`);
-  console.log(`   梦境: 一键去重合并归档\n`);
+checkPortFree(PORT, HOST).then((free) => {
+  if (!free) {
+    console.error(`[hermes-memory] FATAL: port ${PORT} on ${HOST} already in use.`);
+    console.error(`Set HERMES_MEMORY_PORT=<other> or stop the conflicting process.`);
+    process.exit(1);
+  }
+  server.listen(PORT, HOST, () => {
+    console.log(`\n🧠 五层记忆仪表盘已启动`);
+    console.log(`   地址: http://${HOST}:${PORT}`);
+    console.log(`   搜索: 支持中英文 FTS5 全文搜索`);
+    console.log(`   项目: 树形层级管理`);
+    console.log(`   关系: relates_to / supersedes / references`);
+    console.log(`   备份: 查看和管理备份`);
+    console.log(`   梦境: 一键去重合并归档\n`);
+  });
 });
 
 // ---- CLI: 直接 node dashboard.cjs ----

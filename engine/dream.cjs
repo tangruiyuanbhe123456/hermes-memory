@@ -6,7 +6,9 @@
 const fs = require("fs");
 const path = require("path");
 
-const HERMES_HOME = "D:\\hermes-hermes";
+const engine = require("./memory-db.cjs");
+// 复用 memory-db 的解析器,避免逻辑分叉
+const HERMES_HOME = engine.HERMES_HOME;
 const MEMORY_DIR = path.join(HERMES_HOME, "memory");
 const CODEX_MEMORY_DIR = path.join(HERMES_HOME, "codex-memory");
 const DREAM_REPORT = path.join(HERMES_HOME, "dream-report.md");
@@ -16,17 +18,27 @@ const ARCHIVE_DAYS = 30;
 // ---- 文本相似度 ----
 function textSimilarity(a, b) {
   if (!a || !b) return 0;
-  const tokenize = (s) => {
+  if (a === b) return 1;
+  const features = (s) => {
+    const lower = s.toLowerCase();
     const set = new Set();
-    for (const w of s.toLowerCase().split(/[^\w\u4e00-\u9fff]/)) { if (w.length >= 2) set.add(w); }
-    for (const ch of s) { if (ch >= '\u4e00' && ch <= '\u9fff') set.add(ch); }
+    // bigrams (中英文通用,显著提升长句召回率)
+    for (let i = 0; i < lower.length - 1; i++) {
+      const bg = lower.slice(i, i + 2);
+      if (bg.trim()) set.add(bg);
+    }
+    // 单字 (中文单字召回兜底)
+    for (const ch of lower) {
+      if (ch >= '\u4e00' && ch <= '\u9fff') set.add(ch);
+    }
     return set;
   };
-  const setA = tokenize(a);
-  const setB = tokenize(b);
+  const setA = features(a);
+  const setB = features(b);
   if (setA.size === 0 && setB.size === 0) return 0;
   let inter = 0;
   for (const t of setA) { if (setB.has(t)) inter++; }
+  // 保留 Jaccard 系数以维持向后兼容 (阈值 SIMILARITY_THRESHOLD=0.7 不变)
   return inter / new Set([...setA, ...setB]).size;
 }
 

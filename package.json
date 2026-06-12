@@ -39,7 +39,9 @@
     "test": "node test/test-memory.js"
   },
   "dependencies": {
-    "better-sqlite3": "^12.10.0",
+    "better-sqlite3": "^12.10.0"
+  },
+  "devDependencies": {
     "playwright": "^1.60.0",
     "ws": "^8.21.0"
   },
