@@ -36,7 +36,7 @@
     "dream": "node engine/dream.cjs",
     "mcp": "node engine/mcp-server.cjs",
     "health": "node -e \"const e=require('./engine/memory-db.cjs'); console.log(JSON.stringify(e.dbHealth(),null,2))\"",
-    "test": "node test/test-memory.js"
+    "test": "node test/test-similarity.js"
   },
   "dependencies": {
     "better-sqlite3": "^12.10.0"
