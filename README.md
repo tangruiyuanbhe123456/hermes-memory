@@ -1,6 +1,6 @@
 # Hermes Memory
 
-**Five-layer memory system for AI agents.** Zero external dependencies. FTS5 full-text search. MCP protocol. Web dashboard. Dream consolidation. AES-256-GCM encryption.
+**Five-layer memory system for AI agents.** One runtime dep (better-sqlite3). FTS5 full-text search. MCP protocol. Web dashboard. Dream consolidation. AES-256-GCM encryption. Portable install path via `HERMES_MEMORY_HOME`. Dashboard port configurable via `HERMES_MEMORY_PORT`.
 
 > 🚀 `npx skills init` → then `npx skills install memory-system`
 
@@ -119,6 +119,31 @@ node engine/dream.cjs
 ```bash
 node -e "const e=require('./engine/memory-db.cjs'); console.log(JSON.stringify(e.dbHealth(),null,2))"
 ```
+
+### Configuration
+
+All paths and ports are env-overridable. Default behavior is portable across Linux/macOS/Windows.
+
+| Env var | Default (Windows / *nix) | Purpose |
+|---------|--------------------------|---------|
+| `HERMES_MEMORY_HOME` | `D:\hermes-hermes` / `~/.hermes-memory` | Where `memory.db`, `backups/`, `.memory-secrets/` live |
+| `HERMES_MEMORY_PORT` | `3211` | Dashboard port (avoid KeyMemory's 3210) |
+| `HERMES_MEMORY_HOST` | `127.0.0.1` | Dashboard bind address |
+
+Example (Linux, custom data dir + port):
+
+```bash
+HERMES_MEMORY_HOME=/data/hermes HERMES_MEMORY_PORT=3299 npx hermes-memory-dashboard
+```
+
+Example (Windows, D-drive):
+
+```powershell
+$env:HERMES_MEMORY_HOME = "D:\hermes-memory"
+npx hermes-memory-dashboard
+```
+
+> ⚠️ **Port change:** v2.0.0+ defaults to port **3211** (was 3210) to avoid conflict with [KeyMemory](https://github.com/digibeing1001/KeyMemory). Set `HERMES_MEMORY_PORT=3210` to restore the old port.
 
 ---
 

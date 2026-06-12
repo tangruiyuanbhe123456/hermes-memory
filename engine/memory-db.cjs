@@ -7,8 +7,17 @@
 const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
+const os = require("os");
 
-const HERMES_HOME = "D:\\hermes-hermes";
+function resolveHermesHome() {
+  if (process.env.HERMES_MEMORY_HOME) return process.env.HERMES_MEMORY_HOME;
+  const cwdDefault = path.join(process.cwd(), "hermes-memory");
+  if (fs.existsSync(cwdDefault)) return cwdDefault;
+  const homeDefault = path.join(os.homedir(), ".hermes-memory");
+  return homeDefault;
+}
+
+const HERMES_HOME = resolveHermesHome();
 const DB_PATH = path.join(HERMES_HOME, "memory.db");
 const BACKUP_DIR = path.join(HERMES_HOME, "backups");
 const SECRETS_DIR = path.join(HERMES_HOME, ".memory-secrets");
@@ -17,13 +26,23 @@ const BACKUP_RETENTION_DAYS = 7;
 
 // ---- SQLite ----
 let Database = null;
-try { Database = require("better-sqlite3"); } catch {}
+try {
+  Database = require("better-sqlite3");
+} catch (err) {
+  const msg = "[hermes-memory] FATAL: better-sqlite3 not installed or failed to load.\n" +
+              "Run: npm install better-sqlite3\n" +
+              "Original error: " + err.message;
+  throw new Error(msg);
+}
 
 let _db = null;
 
 function getDb() {
   if (_db) return _db;
   if (!Database) return null;
+  fs.mkdirSync(HERMES_HOME, { recursive: true });
+  fs.mkdirSync(BACKUP_DIR, { recursive: true });
+  fs.mkdirSync(SECRETS_DIR, { recursive: true });
   _db = new Database(DB_PATH);
   _db.pragma("journal_mode = WAL");
   _db.pragma("synchronous = NORMAL");
