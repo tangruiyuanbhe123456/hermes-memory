@@ -4,6 +4,8 @@
 
 > 🚀 `npx skills init` → then `npx skills install memory-system`
 
+🌐 **Languages:** [English](README.md) · [简体中文](README.zh-CN.md) · [繁體中文](README_CN.md)
+
 ---
 
 ## Why Hermes Memory?
