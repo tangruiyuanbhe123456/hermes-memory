@@ -192,6 +192,19 @@ Store API keys and credentials encrypted at rest. No `.env` file needed.
 
 Every write to L3/L4/L5 is automatically backed up with 7-day retention. Transaction-safe restore.
 
+### Dashboard (v2.3 Apple iOS style)
+
+`npx hermes-memory-dashboard` opens a web UI at `http://127.0.0.1:3211` (configurable via `HERMES_MEMORY_PORT`). Features:
+
+- **Apple iOS visual system**: dark blue gradient + frosted-glass `backdrop-filter` blur, 22px rounded corners, 17px body font, system blue `#007aff` accent
+- **6 tabs**: Overview / L1 Working / L2 Episodic / L3 Semantic / L4 Procedural / L5 Metacognitive
+- **Drawer modal**: tap any episode → right-side slide-in modal with full detail (summary / source / tags / data JSON), all fields copyable
+- **Live search**: FTS5-powered Chinese+English full-text search with debounced input
+- **Layer badge**: L2 tab shows episode count badge (live from `/api/health`)
+- **Zero external deps**: HTML+CSS+JS all inline (no React/Vue/CSS framework)
+
+Port defaults to 3211 to avoid conflict with KeyMemory (3210). Set `HERMES_MEMORY_PORT=3210` to restore old port.
+
 ---
 
 ## Comparison with Competitors

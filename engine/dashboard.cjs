@@ -29,309 +29,400 @@ const HTML = `<!DOCTYPE html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🧠 五层记忆仪表盘</title>
+<title>Hermes Memory</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
-body{background:#0d1117;color:#c9d1d9;padding:20px;max-width:1200px;margin:auto}
-h1{color:#58a6ff;font-size:24px;margin-bottom:20px}
-h2{color:#58a6ff;font-size:18px;margin:20px 0 10px;border-bottom:1px solid #30363d;padding-bottom:5px}
-.card{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:16px;margin-bottom:16px}
-.stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:20px}
-.stat{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:12px;text-align:center}
-.stat-num{font-size:28px;font-weight:700;color:#58a6ff}
-.stat-label{font-size:12px;color:#8b949e;margin-top:4px}
-.search-box{display:flex;gap:8px;margin-bottom:16px}
-.search-box input{flex:1;padding:10px 14px;background:#0d1117;border:1px solid #30363d;border-radius:6px;color:#c9d1d9;font-size:14px}
-.search-box input:focus{border-color:#58a6ff;outline:none}
-.search-box button{padding:10px 20px;background:#238636;border:none;border-radius:6px;color:#fff;font-size:14px;cursor:pointer}
-.search-box button:hover{background:#2ea043}
-.filter-row{display:flex;gap:12px;margin-bottom:12px;flex-wrap:wrap}
-.filter-row select,.filter-row input{padding:6px 10px;background:#0d1117;border:1px solid #30363d;border-radius:4px;color:#c9d1d9;font-size:13px}
-table{width:100%;border-collapse:collapse}
-th{text-align:left;padding:8px 12px;border-bottom:2px solid #30363d;color:#8b949e;font-size:12px;text-transform:uppercase}
-td{padding:8px 12px;border-bottom:1px solid #21262d;font-size:13px}
-tr:hover td{background:#1c2128}
-.tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;background:#1f6feb33;color:#58a6ff;margin:1px}
-.tag-ok{background:#23863633;color:#3fb950}
-.tag-pending{background:#d2992233;color:#d29922}
-.tag-fail{background:#da363333;color:#f85149}
-.project-path{color:#58a6ff;font-size:12px}
-.actions{display:flex;gap:4px}
-.actions button{background:#21262d;border:1px solid #30363d;border-radius:4px;color:#8b949e;padding:2px 8px;font-size:11px;cursor:pointer}
-.actions button:hover{background:#30363d;color:#c9d1d9}
-.rel-card{background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:12px;margin-bottom:8px}
-.rel-card .label{color:#8b949e;font-size:11px}
-.proj-tree{margin-left:16px}
-.proj-item{padding:4px 0}
-.proj-item .folder{color:#d29922;cursor:pointer}
-.proj-item .folder:hover{color:#e3b341}
-.proj-item .count{color:#8b949e;font-size:11px;margin-left:8px}
-.tabs{display:flex;gap:4px;margin-bottom:16px;border-bottom:1px solid #30363d;padding-bottom:0}
-.tab{padding:8px 16px;background:transparent;border:none;color:#8b949e;cursor:pointer;font-size:14px;border-bottom:2px solid transparent;margin-bottom:-1px}
-.tab.active{color:#58a6ff;border-bottom-color:#58a6ff}
-.tab:hover{color:#c9d1d9}
-.hidden{display:none}
-.backup-table td{font-size:12px}
-#loading{text-align:center;padding:40px;color:#8b949e}
-.pagination{display:flex;justify-content:center;gap:8px;margin-top:12px}
-.pagination button{background:#21262d;border:1px solid #30363d;border-radius:4px;color:#c9d1d9;padding:6px 12px;cursor:pointer}
-.pagination button:hover{background:#30363d}
-.pagination .page-info{color:#8b949e;padding:6px 0}
+:root {
+  --bg-primary: #000814;
+  --bg-secondary: rgba(28, 37, 64, 0.6);
+  --bg-tertiary: rgba(44, 53, 80, 0.4);
+  --blur: saturate(180%) blur(20px);
+  --radius-card: 22px;
+  --radius-button: 14px;
+  --radius-input: 12px;
+  --accent: #007aff;
+  --accent-green: #30d158;
+  --accent-red: #ff453a;
+  --accent-orange: #ff9f0a;
+  --text-primary: rgba(255,255,255,0.92);
+  --text-secondary: rgba(235,235,245,0.6);
+  --text-tertiary: rgba(235,235,245,0.3);
+  --separator: rgba(84,84,88,0.65);
+  --font-body: 17px;
+  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC", sans-serif;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body {
+  background: var(--bg-primary);
+  background-image: linear-gradient(135deg, #001a3d 0%, #000814 50%, #0a0a1f 100%);
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  font-size: var(--font-body);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+.app { max-width: 1100px; margin: 0 auto; padding: 20px; }
+.statusbar {
+  background: var(--bg-secondary);
+  -webkit-backdrop-filter: var(--blur);
+  backdrop-filter: var(--blur);
+  border-radius: var(--radius-card);
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.statusbar h1 { font-size: 20px; font-weight: 600; }
+.status-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.status-dot.ok { background: var(--accent-green); box-shadow: 0 0 8px var(--accent-green); }
+.status-dot.fail { background: var(--accent-red); box-shadow: 0 0 8px var(--accent-red); }
+.status-info { color: var(--text-secondary); font-size: 13px; }
+.tabs {
+  background: var(--bg-secondary);
+  -webkit-backdrop-filter: var(--blur);
+  backdrop-filter: var(--blur);
+  border-radius: var(--radius-card);
+  padding: 6px;
+  display: flex;
+  gap: 4px;
+  margin-bottom: 16px;
+  border: 1px solid rgba(255,255,255,0.08);
+  overflow-x: auto;
+}
+.tab {
+  flex: 1;
+  min-width: 80px;
+  padding: 10px 14px;
+  border-radius: var(--radius-button);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 15px;
+  font-weight: 500;
+  text-align: center;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+.tab:hover { color: var(--text-primary); }
+.tab.active {
+  background: var(--accent);
+  color: white;
+  font-weight: 600;
+}
+.tab .layer-badge {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.2);
+  font-size: 11px;
+  margin-left: 4px;
+}
+.search {
+  background: var(--bg-secondary);
+  -webkit-backdrop-filter: var(--blur);
+  backdrop-filter: var(--blur);
+  border-radius: var(--radius-card);
+  padding: 14px;
+  margin-bottom: 16px;
+  display: flex;
+  gap: 10px;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.search input {
+  flex: 1;
+  padding: 12px 16px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--separator);
+  border-radius: var(--radius-input);
+  color: var(--text-primary);
+  font-size: var(--font-body);
+  outline: none;
+}
+.search input:focus { border-color: var(--accent); }
+.search button {
+  padding: 12px 24px;
+  background: var(--accent);
+  border: none;
+  border-radius: var(--radius-button);
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.search button:hover { opacity: 0.85; }
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.stat {
+  background: var(--bg-secondary);
+  -webkit-backdrop-filter: var(--blur);
+  backdrop-filter: var(--blur);
+  border-radius: var(--radius-card);
+  padding: 16px;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.stat-num { font-size: 32px; font-weight: 700; color: var(--accent); margin-bottom: 4px; }
+.stat-label { font-size: 13px; color: var(--text-secondary); }
+.list {
+  background: var(--bg-secondary);
+  -webkit-backdrop-filter: var(--blur);
+  backdrop-filter: var(--blur);
+  border-radius: var(--radius-card);
+  border: 1px solid rgba(255,255,255,0.08);
+  overflow: hidden;
+}
+.episode {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--separator);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.episode:last-child { border-bottom: none; }
+.episode:hover { background: rgba(255,255,255,0.05); }
+.episode-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.episode-id { font-size: 13px; color: var(--text-tertiary); font-family: ui-monospace, monospace; }
+.episode-time { font-size: 13px; color: var(--text-secondary); }
+.episode-summary { font-size: 15px; line-height: 1.4; }
+.episode-tags { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 6px; }
+.tag {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 10px;
+  font-size: 12px;
+  background: rgba(0,122,255,0.2);
+  color: var(--accent);
+}
+.tag.platform { background: rgba(48,209,88,0.2); color: var(--accent-green); }
+.tag.status-ok { background: rgba(48,209,88,0.2); color: var(--accent-green); }
+.tag.status-pending { background: rgba(255,159,10,0.2); color: var(--accent-orange); }
+.tag.status-fail { background: rgba(255,69,58,0.2); color: var(--accent-red); }
+.empty { padding: 60px 20px; text-align: center; color: var(--text-secondary); font-size: 15px; }
+.modal-bg {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.4);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  z-index: 100;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+.modal-bg.open { opacity: 1; pointer-events: auto; }
+.modal {
+  position: fixed;
+  top: 0; right: 0; bottom: 0;
+  width: 100%;
+  max-width: 520px;
+  background: var(--bg-primary);
+  background-image: linear-gradient(135deg, #001a3d 0%, #000814 100%);
+  z-index: 101;
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
+  overflow-y: auto;
+  border-left: 1px solid var(--separator);
+}
+.modal.open { transform: translateX(0); }
+.modal-head {
+  position: sticky; top: 0;
+  background: var(--bg-secondary);
+  -webkit-backdrop-filter: var(--blur);
+  backdrop-filter: var(--blur);
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--separator);
+  z-index: 1;
+}
+.modal-head h2 { font-size: 19px; font-weight: 600; }
+.modal-close {
+  background: rgba(255,255,255,0.1);
+  border: none;
+  color: var(--text-primary);
+  font-size: 18px;
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.modal-close:hover { background: rgba(255,255,255,0.2); }
+.modal-body { padding: 20px; }
+.field { margin-bottom: 18px; }
+.field-label { font-size: 13px; color: var(--text-secondary); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+.field-value {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--separator);
+  border-radius: var(--radius-input);
+  padding: 12px 14px;
+  font-size: 15px;
+  word-break: break-word;
+  user-select: text;
+  -webkit-user-select: text;
+  font-family: ui-monospace, "SF Mono", monospace;
+}
+.field-value.text { font-family: var(--font-display); }
+pre { margin: 0; white-space: pre-wrap; word-break: break-word; }
+.copy-btn {
+  background: rgba(0,122,255,0.2);
+  color: var(--accent);
+  border: none;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  cursor: pointer;
+  margin-top: 8px;
+}
+.copy-btn:hover { background: rgba(0,122,255,0.3); }
 </style>
 </head>
 <body>
-<h1>🧠 五层记忆仪表盘</h1>
-
-<div class="stats" id="stats"></div>
-
-<div class="tabs">
-  <button class="tab active" onclick="switchTab('search')">🔍 搜索</button>
-  <button class="tab" onclick="switchTab('projects')">📁 项目树</button>
-  <button class="tab" onclick="switchTab('relations')">🔗 关系</button>
-  <button class="tab" onclick="switchTab('backups')">💾 备份</button>
-  <button class="tab" onclick="switchTab('dream')">🌙 梦境</button>
-</div>
-
-<div id="tab-search">
-  <div class="search-box">
-    <input id="search-input" placeholder="搜索记忆关键词（中/英文）" onkeydown="if(event.key==='Enter')search()" autofocus>
-    <button onclick="search()">搜索</button>
+<div class="app">
+  <div class="statusbar">
+    <h1>🧠 Hermes Memory</h1>
+    <div class="status-info">
+      <span class="status-dot" id="statusDot"></span>
+      <span id="statusText">加载中…</span>
+    </div>
   </div>
-  <div class="filter-row">
-    <select id="filter-platform"><option value="">全部平台</option><option value="xhs">小红书</option><option value="douyin">抖音</option><option value="wechat">公众号</option><option value="xianyu">闲鱼</option></select>
-    <select id="filter-source"><option value="">全部来源</option><option value="hermes">Hermes</option><option value="codex">Codex</option></select>
-    <select id="filter-days"><option value="7">近7天</option><option value="30" selected>近30天</option><option value="90">近90天</option><option value="365">近1年</option><option value="0">全部</option></select>
-    <input id="filter-project" placeholder="项目路径过滤" style="width:200px">
+  <div class="tabs">
+    <button class="tab active" data-layer="">Overview</button>
+    <button class="tab" data-layer="L1_working">L1 Working</button>
+    <button class="tab" data-layer="L2_episodic">L2 Episodic <span class="layer-badge" id="badge-L2">…</span></button>
+    <button class="tab" data-layer="L3_semantic">L3 Semantic</button>
+    <button class="tab" data-layer="L4_procedural">L4 Procedural</button>
+    <button class="tab" data-layer="L5_metacognitive">L5 Metacog</button>
   </div>
-  <div id="results"></div>
-  <div id="pagination" class="pagination hidden"></div>
-</div>
-
-<div id="tab-projects" class="hidden">
-  <div class="search-box" style="margin-bottom:12px">
-    <input id="new-project-path" placeholder="新建项目路径 (如 运营/小红书/发布)" style="flex:1">
-    <input id="new-project-desc" placeholder="描述" style="width:200px">
-    <button onclick="createProject()">创建</button>
+  <div class="search">
+    <input type="text" id="searchInput" placeholder="搜索记忆 (中英文)…" />
+    <button onclick="doSearch()">搜索</button>
   </div>
-  <div id="project-tree"></div>
-  <div id="project-memories"></div>
+  <div class="stats" id="stats"></div>
+  <div class="list" id="list"><div class="empty">输入关键词搜索，或切换 tab 浏览分层</div></div>
 </div>
-
-<div id="tab-relations" class="hidden">
-  <div class="search-box">
-    <input id="rel-memory-id" placeholder="输入记忆 ID" type="number" style="width:200px">
-    <button onclick="showRelations()">查看关系</button>
+<div class="modal-bg" id="modalBg" onclick="closeModal()"></div>
+<div class="modal" id="modal">
+  <div class="modal-head">
+    <h2 id="modalTitle">记忆详情</h2>
+    <button class="modal-close" onclick="closeModal()">✕</button>
   </div>
-  <div id="relation-list"></div>
-  <div id="relation-stats"></div>
+  <div class="modal-body" id="modalBody"></div>
 </div>
-
-<div id="tab-backups" class="hidden">
-  <div id="backup-list"></div>
-</div>
-
-<div id="tab-dream" class="hidden">
-  <button class="search-box" style="background:#238636;border:none;border-radius:6px;color:#fff;padding:10px 20px;cursor:pointer;font-size:14px;width:auto" onclick="runDream()">🌙 运行梦境整理</button>
-  <div id="dream-report" style="margin-top:12px"></div>
-</div>
-
 <script>
-let currentPage = 0;
-const PAGE_SIZE = 20;
-
-async function api(path) {
-  const res = await fetch(path);
-  if (!res.ok) throw new Error(await res.text());
-  return res.json();
-}
-
-// 仪表盘统计
-(async function(){
+let currentLayer = "";
+const $ = (id) => document.getElementById(id);
+async function fetchHealth() {
   try {
-    const h = await api('/api/health');
-    document.getElementById('stats').innerHTML = [
-      ['记忆总数', h.count],
-      ['关系数', h.relations],
-      ['项目数', h.projects],
-      ['备份数', h.backups],
-      ['密钥数', h.secrets],
-      ['引擎', h.engine.split(' ').slice(0,2).join(' ')],
-    ].map(([l,n]) => '<div class="stat"><div class="stat-num">'+n+'</div><div class="stat-label">'+l+'</div></div>').join('');
-  } catch(e) { document.getElementById('stats').innerHTML = '<div class="card">❌ 连接失败: '+e.message+'</div>'; }
-})();
-
-async function loadBackups() {
-  try {
-    const b = await api('/api/backups');
-    document.getElementById('backup-list').innerHTML = b.length === 0 ? '<div class="card">暂无备份</div>' :
-      '<table><tr><th>备份名</th><th>大小</th><th>时间</th><th>SHA256</th></tr>' +
-      b.map(x => '<tr><td>'+x.name+'</td><td>'+(x.size/1024).toFixed(1)+'KB</td><td>'+new Date(x.mtime).toLocaleString()+'</td><td style="font-size:11px;color:#8b949e">'+(x.checksum||'-').substring(0,16)+'…</td></tr>').join('') +
-      '</table>';
-  } catch(e) { document.getElementById('backup-list').innerHTML = '<div class="card">❌ '+e.message+'</div>'; }
-}
-
-async function loadProjects() {
-  try {
-    const tree = await api('/api/projects/tree');
-    function renderTree(obj, depth) {
-      let html = '<div class="proj-tree">';
-      for (const [key, val] of Object.entries(obj)) {
-        if (key === '__meta' || key === '__children') continue;
-        const meta = val.__meta;
-        const count = meta ? ('<span class="count">('+meta.memory_count+'条)</span>') : '';
-        html += '<div class="proj-item" style="padding-left:'+(depth*20)+'px">';
-        html += '<span class="folder" onclick="filterByProject(\\''+escapeStr(meta?.path||key)+'\\')">📁 '+key+'</span>'+count;
-        if (meta?.description) html += '<br><span style="color:#8b949e;font-size:12px;margin-left:20px">'+meta.description+'</span>';
-        if (val.__children && Object.keys(val.__children).length > 0) {
-          html += renderTree(val.__children, depth + 1);
-        }
-        html += '</div>';
-      }
-      return html + '</div>';
-    }
-    function escapeStr(s) { return s.replace(/\\'/g,"\\\\'").replace(/'/g,"\\'"); }
-    document.getElementById('project-tree').innerHTML = Object.keys(tree).length === 0 ? '<div class="card">暂无项目，创建一个开始</div>' :
-      '<div class="card">'+renderTree(tree, 0)+'</div>';
-  } catch(e) { document.getElementById('project-tree').innerHTML = '<div class="card">❌ '+e.message+'</div>'; }
-}
-
-function filterByProject(proj) {
-  document.getElementById('filter-project').value = proj;
-  switchTab('search');
-  search();
-}
-
-async function createProject() {
-  const p = document.getElementById('new-project-path').value.trim();
-  if (!p) return alert('请输入项目路径');
-  const d = document.getElementById('new-project-desc').value.trim();
-  await api('/api/projects/create?path='+encodeURIComponent(p)+'&desc='+encodeURIComponent(d));
-  document.getElementById('new-project-path').value = '';
-  document.getElementById('new-project-desc').value = '';
-  loadProjects();
-}
-
-async function showRelations() {
-  const id = document.getElementById('rel-memory-id').value;
-  if (!id) return;
-  const r = await api('/api/relations/'+id);
-  document.getElementById('relation-list').innerHTML = r.length === 0 ? '<div class="card">无相关记忆</div>' :
-    r.map(x => '<div class="rel-card">🔗 <b>'+x.type+'</b> → ' +
-      (x.related_memory ? '#'+x.related_memory.id+' ['+x.related_memory.platform+'] '+x.related_memory.summary : '已删除记忆') +
-      (x.note ? '<br><span class="label">备注: '+x.note+'</span>' : '') +
-      '</div>').join('');
-  const stats = await api('/api/relations/types');
-  document.getElementById('relation-stats').innerHTML = stats.length > 0 ? '<div class="card"><b>关系统计</b><br>'+stats.map(s => s.type+': '+s.count+'条').join(' | ')+'</div>' : '';
-}
-
-async function search() {
-  const q = document.getElementById('search-input').value;
-  const platform = document.getElementById('filter-platform').value;
-  const source = document.getElementById('filter-source').value;
-  const days = parseInt(document.getElementById('filter-days').value);
-  const project = document.getElementById('filter-project').value.trim();
-  currentPage = 0;
-  await doSearch(q, platform, source, days, project, 0);
-}
-
-async function doSearch(q, platform, source, days, project, page) {
-  const params = new URLSearchParams({limit:PAGE_SIZE, offset:page*PAGE_SIZE});
-  if (q) params.set('query', q);
-  if (platform) params.set('platform', platform);
-  if (source) params.set('source', source);
-  if (days > 0) params.set('days', days);
-  if (project) params.set('project', project);
-  
-  try {
-    const results = await api('/api/search?'+params.toString());
-    const total = await api('/api/count?'+params.toString());
-    
-    const container = document.getElementById('results');
-    if (results.length === 0) {
-      container.innerHTML = '<div class="card">没有找到匹配的记忆</div>';
-      document.getElementById('pagination').classList.add('hidden');
-      return;
-    }
-    
-    container.innerHTML = '<table><tr><th>ID</th><th>时间</th><th>平台</th><th>动作</th><th>状态</th><th>摘要</th><th>项目</th><th>操作</th></tr>' +
-      results.map(r => {
-        const statusClass = 'tag tag-'+({ok:'ok',pending:'pending',fail:'fail',success:'ok',error:'fail'}[r.status]||'');
-        const tags = (r.tags||[]).map(t => '<span class="tag">'+t+'</span>').join('');
-        const proj = r.project ? '<span class="project-path">'+r.project+'</span>' : '';
-        return '<tr><td>#'+r.id+'</td><td style="font-size:11px">'+(r.timestamp||'').substring(0,16)+'</td><td>'+r.platform+'</td><td>'+r.action+'</td><td><span class="'+statusClass+'">'+r.status+'</span></td><td>'+r.summary+' '+tags+'</td><td>'+proj+'</td><td class="actions"><button onclick="showRelationFor('+r.id+')" title="查看关系">🔗</button><button onclick="assignProject('+r.id+')" title="分配项目">📁</button></td></tr>';
-      }).join('') + '</table>';
-    
-    // Pagination
-    const pag = document.getElementById('pagination');
-    const totalCount = typeof total === 'number' ? total : (total?.cnt || 0);
-    const totalPages = Math.ceil(totalCount / PAGE_SIZE);
-    if (totalPages > 1) {
-      pag.classList.remove('hidden');
-      pag.innerHTML = '<button onclick="goPage(-1)" '+(page===0?'disabled':'')+'>←</button>' +
-        '<span class="page-info">第'+(page+1)+'/'+totalPages+'页 ('+totalCount+'条)</span>' +
-        '<button onclick="goPage(1)" '+(page>=totalPages-1?'disabled':'')+'>→</button>';
-    } else {
-      pag.classList.add('hidden');
-    }
-  } catch(e) { document.getElementById('results').innerHTML = '<div class="card">❌ '+e.message+'</div>'; }
-}
-
-function goPage(delta) {
-  currentPage += delta;
-  if (currentPage < 0) currentPage = 0;
-  const q = document.getElementById('search-input').value;
-  const platform = document.getElementById('filter-platform').value;
-  const source = document.getElementById('filter-source').value;
-  const days = parseInt(document.getElementById('filter-days').value);
-  const project = document.getElementById('filter-project').value.trim();
-  doSearch(q, platform, source, days, project, currentPage);
-}
-
-async function showRelationFor(id) {
-  document.getElementById('rel-memory-id').value = id;
-  switchTab('relations');
-  showRelations();
-}
-
-async function assignProject(id) {
-  const proj = prompt('输入项目路径 (例: 运营/小红书/发布):');
-  if (proj !== null) {
-    await api('/api/assign-project?id='+id+'&project='+encodeURIComponent(proj));
-    search();
+    const r = await fetch("/api/health");
+    const h = await r.json();
+    $("statusDot").className = "status-dot " + (h.ok ? "ok" : "fail");
+    $("statusText").textContent = h.ok ? "FTS5 ready · " + h.count + " episodes · " + h.engine.split(" ")[0] : "离线 / " + (h.engine || "未配置");
+    renderStats(h);
+    return h;
+  } catch (e) {
+    $("statusDot").className = "status-dot fail";
+    $("statusText").textContent = "API 不可用: " + e.message;
+    return null;
   }
 }
-
-async function runDream() {
-  const btn = event.target;
-  btn.disabled = true;
-  btn.textContent = '⏳ 运行中...';
+function renderStats(h) {
+  if (!h || !h.ok) return;
+  $("stats").innerHTML = \`
+    <div class="stat"><div class="stat-num">\${h.count}</div><div class="stat-label">Episodes</div></div>
+    <div class="stat"><div class="stat-num">\${h.relations}</div><div class="stat-label">Relations</div></div>
+    <div class="stat"><div class="stat-num">\${h.projects}</div><div class="stat-label">Projects</div></div>
+    <div class="stat"><div class="stat-num">\${h.backups}</div><div class="stat-label">Backups</div></div>
+    <div class="stat"><div class="stat-num">\${h.secrets}</div><div class="stat-label">Secrets</div></div>
+    <div class="stat"><div class="stat-num">\${h.ftsReady ? "✓" : "✗"}</div><div class="stat-label">FTS5 Index</div></div>
+  \`;
+}
+async function doSearch() {
+  const q = $("searchInput").value.trim();
+  const params = new URLSearchParams();
+  if (q) params.set("query", q);
+  if (currentLayer) params.set("project", currentLayer);
+  params.set("limit", "50");
   try {
-    const res = await api('/api/dream');
-    document.getElementById('dream-report').innerHTML = '<div class="card"><pre style="white-space:pre-wrap;font-size:13px;line-height:1.6">'+res.report+'</pre></div>';
-    loadBackups();
-  } catch(e) { document.getElementById('dream-report').innerHTML = '<div class="card">❌ '+e.message+'</div>'; }
-  btn.disabled = false;
-  btn.textContent = '🌙 运行梦境整理';
+    const r = await fetch("/api/search?" + params);
+    const rows = await r.json();
+    renderList(rows);
+  } catch (e) {
+    $("list").innerHTML = '<div class="empty">搜索失败: ' + e.message + '</div>';
+  }
 }
-
-function switchTab(name) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  event.target.classList.add('active');
-  document.querySelectorAll('[id^="tab-"]').forEach(t => t.classList.add('hidden'));
-  document.getElementById('tab-'+name).classList.remove('hidden');
-  
-  // Lazy load
-  if (name === 'backups') loadBackups();
-  if (name === 'projects') loadProjects();
-  if (name === 'relations') showRelations();
+function renderList(rows) {
+  if (!rows || rows.length === 0) {
+    $("list").innerHTML = '<div class="empty">无匹配记录</div>';
+    return;
+  }
+  $("list").innerHTML = rows.map(ep => \`
+    <div class="episode" onclick="openEpisode(\${ep.id})">
+      <div class="episode-head">
+        <span class="episode-id">#\${ep.id} · \${ep.source || "?"}</span>
+        <span class="episode-time">\${(ep.timestamp || "").slice(0,19).replace("T"," ")}</span>
+      </div>
+      <div class="episode-summary">\${escapeHtml(ep.summary || ep.action || "(无内容)")}</div>
+      <div class="episode-tags">
+        \${ep.platform ? \`<span class="tag platform">\${escapeHtml(ep.platform)}</span>\` : ""}
+        \${ep.status ? \`<span class="tag status-\${ep.status === "ok" || ep.status === "done" ? "ok" : ep.status === "fail" ? "fail" : "pending"}">\${escapeHtml(ep.status)}</span>\` : ""}
+        \${ep.project ? \`<span class="tag">📁 \${escapeHtml(ep.project)}</span>\` : ""}
+      </div>
+    </div>
+  \`).join("");
 }
-
-// 初始加载备份信息
-loadBackups();
+async function openEpisode(id) {
+  try {
+    const r = await fetch("/api/episodes/" + id);
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    const ep = await r.json();
+    showModal(ep);
+  } catch (e) {
+    alert("加载失败: " + e.message);
+  }
+}
+function showModal(ep) {
+  $("modalTitle").textContent = "记忆 #" + ep.id;
+  $("modalBody").innerHTML = \`
+    <div class="field"><div class="field-label">Summary</div><div class="field-value text">\${escapeHtml(ep.summary || "")}</div><button class="copy-btn" onclick="copyText(this, '\${escapeHtml(ep.summary || "").replace(/'/g, "\\\\'")}')">复制</button></div>
+    <div class="field"><div class="field-label">Source / Platform / Action</div><div class="field-value">\${escapeHtml(ep.source || "")} · \${escapeHtml(ep.platform || "")} · \${escapeHtml(ep.action || "")}</div></div>
+    <div class="field"><div class="field-label">Timestamp / Status / Duration</div><div class="field-value">\${escapeHtml(ep.timestamp || "")} · \${escapeHtml(ep.status || "")} · \${ep.duration || 0}s</div></div>
+    <div class="field"><div class="field-label">Project</div><div class="field-value">\${escapeHtml(ep.project || "(无)")}</div></div>
+    <div class="field"><div class="field-label">Tags</div><div class="field-value text">\${escapeHtml(JSON.stringify(ep.tags || [], null, 2))}</div></div>
+    <div class="field"><div class="field-label">Data (JSON)</div><div class="field-value"><pre>\${escapeHtml(JSON.stringify(ep.data || {}, null, 2))}</pre></div></div>
+  \`;
+  $("modalBg").classList.add("open");
+  $("modal").classList.add("open");
+}
+function closeModal() {
+  $("modalBg").classList.remove("open");
+  $("modal").classList.remove("open");
+}
+function copyText(btn, text) {
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = "✓ 已复制";
+    setTimeout(() => btn.textContent = "复制", 1500);
+  });
+}
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+document.querySelectorAll(".tab").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".tab").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    currentLayer = btn.dataset.layer;
+    doSearch();
+  });
+});
+$("searchInput").addEventListener("keypress", e => { if (e.key === "Enter") doSearch(); });
+fetchHealth().then(h => doSearch());
 </script>
 </body>
 </html>`;
-
 // ---- HTTP Server ----
 const server = http.createServer((req, res) => {
   const url = new URL(req.url, `http://${HOST}:${PORT}`);
@@ -377,6 +468,26 @@ const server = http.createServer((req, res) => {
       opts.limit = parseInt(params.get("limit")) || 20;
       opts.offset = parseInt(params.get("offset")) || 0;
       json(engine.dbSearchEpisodes(opts));
+      return;
+    }
+
+    // ---- API: 单条 episode 详情 ----
+    if (path.startsWith("/api/episodes/")) {
+      const id = parseInt(path.split("/").pop());
+      if (isNaN(id)) { json({ error: "invalid id" }, 400); return; }
+      try {
+        const dbPath = require("path").join(engine.HERMES_HOME, "memory.db");
+        const Database = require("better-sqlite3");
+        const db = new Database(dbPath, { readonly: true });
+        const row = db.prepare("SELECT * FROM episodic WHERE id = ?").get(id);
+        db.close();
+        if (!row) { json({ error: "not found" }, 404); return; }
+        try { row.tags = JSON.parse(row.tags || "[]"); } catch { row.tags = []; }
+        try { row.data = JSON.parse(row.data || "{}"); } catch { row.data = {}; }
+        json(row);
+      } catch (e) {
+        json({ error: e.message }, 500);
+      }
       return;
     }
 

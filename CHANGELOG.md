@@ -7,7 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
+### Added (v2.3 Dashboard)
+
+- **Dashboard UI rewrite** (`engine/dashboard.cjs`): Apple iOS visual system — dark blue gradient + frosted-glass `backdrop-filter` blur, 22px rounded corners, 17px body font, system blue `#007aff` accent. 6 tabs (Overview / L1 Working / L2 Episodic / L3 Semantic / L4 Procedural / L5 Metacognitive). Right-side drawer modal for episode detail with copy-to-clipboard. Zero external deps (HTML+CSS+JS all inline).
+- **New API endpoint** `GET /api/episodes/:id` returns single episode detail (tags + data auto-parsed as JSON). HTTP 200/400/404/500 handled. Used by drawer modal.
+
+### Added (v2.2 L2 Auto-Summary)
 
 - **L2 Episode Auto-Summary** (`engine/dream.cjs`): Long episode summaries (>200 chars) compressed to ≤200 tokens via LLM. Supports DeepSeek / SiliconFlow / OpenRouter / Groq (OpenAI-compatible). Auto-fallback to first provider with env key set. CLI flag `--dream-skip-llm` disables LLM (heuristic only). See README "L2 Episode Auto-Summary" section for setup.
 - **New engine module** `engine/llm-client.cjs` — zero-runtime-deps OpenAI-compatible chat client (uses Node built-in `https`). 4 providers configured, `HERMES_LLM_PROVIDER` env override.
