@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **L2 Episode Auto-Summary** (`engine/dream.cjs`): Long episode summaries (>200 chars) compressed to ≤200 tokens via LLM. Supports DeepSeek / SiliconFlow / OpenRouter / Groq (OpenAI-compatible). Auto-fallback to first provider with env key set. CLI flag `--dream-skip-llm` disables LLM (heuristic only). See README "L2 Episode Auto-Summary" section for setup.
+- **New engine module** `engine/llm-client.cjs` — zero-runtime-deps OpenAI-compatible chat client (uses Node built-in `https`). 4 providers configured, `HERMES_LLM_PROVIDER` env override.
+
+### Changed
+
+- **dream.cjs `runDream()` is now async** (CLI call site wrapped with `.then().catch()`).
+
+### Added (Files)
+
+- `.env.example` documenting all LLM provider env vars + data path + dashboard config.
+
+[Unreleased]: https://github.com/tangruiyuanbhe123456/hermes-memory/compare/v2.1.0...HEAD
+
 ## [2.1.0] - 2026-06-13
 
 ### Added

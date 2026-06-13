@@ -143,6 +143,29 @@ $env:HERMES_MEMORY_HOME = "D:\hermes-memory"
 npx hermes-memory-dashboard
 ```
 
+### L2 Episode Auto-Summary (v2.2+)
+
+Dream consolidation can call an LLM to compress long episode summaries (>200 chars) down to ≤200 tokens, saving storage and improving FTS5 recall. **Disabled by default** — requires an API key.
+
+Supported providers (OpenAI-compatible, auto-fallback to first one with key):
+
+| Provider | Env var | Cost | Model |
+|----------|---------|------|-------|
+| DeepSeek (recommended) | `DEEPSEEK_API_KEY` | ~¥1 / 1M tokens | `deepseek-chat` |
+| SiliconFlow | `SILICONFLOW_API_KEY` | ¥14 starter pack | `Qwen/Qwen2.5-7B-Instruct` |
+| OpenRouter | `OPENROUTER_API_KEY` | Free tier | `meta-llama/llama-3.1-8b-instruct:free` |
+| Groq | `GROQ_API_KEY` | Free tier | `llama-3.1-8b-instant` |
+
+Usage:
+
+```bash
+export DEEPSEEK_API_KEY=*** engine/dream.cjs                    # auto-summarize using DeepSeek
+node engine/dream.cjs --dream-skip-llm   # heuristic only, no API call
+node engine/dream.cjs --dry-run          # preview without writing
+```
+
+If no API key is set, dream.cjs silently falls back to a heuristic (first 100 + last 100 chars with ellipsis).
+
 > ⚠️ **Port change:** v2.0.0+ defaults to port **3211** (was 3210) to avoid conflict with [KeyMemory](https://github.com/digibeing1001/KeyMemory). Set `HERMES_MEMORY_PORT=3210` to restore the old port.
 
 ---

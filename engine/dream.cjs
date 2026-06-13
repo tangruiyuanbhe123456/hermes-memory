@@ -128,6 +128,96 @@ function archiveOldItems(filePath, type, ageField = "learned") {
   return { archived, report };
 }
 
+// ---- Heuristic 摘要 (LLM 不可用时降级方案) ----
+function heuristicSummary(text) {
+  if (!text || text.length <= 200) return text;
+  // 策略: 首段(开头 100 char) + 末段(结尾 100 char),中间用省略号
+  const head = text.slice(0, 100).trim();
+  const tail = text.slice(-100).trim();
+  return `${head}...${tail}`;
+}
+
+// ---- LLM 摘要 L2 episodes ----
+async function summarizeLongEpisodes(opts = {}) {
+  const { skipLlm = false, dryRun = false } = opts;
+  // 直接连 DB (绕开 engine.getDb() 不导出限制)
+  let db;
+  try {
+    const Database = require("better-sqlite3");
+    const dbPath = path.join(HERMES_HOME, "memory.db");
+    db = new Database(dbPath, { readonly: false });
+  } catch (err) {
+    return { summarized: 0, heuristic: 0, skipped: 0, processed: 0, error: "db open failed: " + err.message };
+  }
+
+  let result;
+  try {
+    // 查询长 summary 的 episodes (table 不存在 → 当作空集处理)
+    let rows;
+    try {
+      rows = db.prepare("SELECT id, summary FROM episodic WHERE length(summary) > 200 AND summary != ''").all();
+    } catch (tableErr) {
+      // episodic 表不存在 (全新 DB) → 视为无 L2 数据
+      result = { summarized: 0, heuristic: 0, skipped: 0, processed: 0 };
+      return result;
+    }
+    if (rows.length === 0) {
+      result = { summarized: 0, heuristic: 0, skipped: 0, processed: 0 };
+      return result;
+    }
+
+    const llm = skipLlm ? null : require("./llm-client.cjs");
+    let summarized = 0, heuristic = 0, skipped = 0;
+    const report = [];
+
+    for (const row of rows) {
+      const original = row.summary;
+      let newSummary = null;
+      let mode = "skipped";
+
+      if (llm) {
+        try {
+          const messages = llm.buildSummaryPrompt(original, 200);
+          const { content } = await llm.chat({ messages, maxTokens: 250 });
+          newSummary = content.trim();
+          mode = "llm";
+        } catch (err) {
+          // LLM 失败 → 降级 heuristic
+          newSummary = heuristicSummary(original);
+          mode = "heuristic";
+          report.push(`  ⚠️ #${row.id} LLM 失败 (${err.message.slice(0, 80)}),降级 heuristic`);
+        }
+      } else {
+        newSummary = heuristicSummary(original);
+        mode = "heuristic";
+      }
+
+      if (!newSummary || newSummary === original) {
+        skipped++;
+        continue;
+      }
+
+      if (!dryRun) {
+        try {
+          db.prepare("UPDATE episodic SET summary = ? WHERE id = ?").run(newSummary, row.id);
+        } catch (err) {
+          report.push(`  ❌ #${row.id} DB update failed: ${err.message.slice(0, 80)}`);
+          continue;
+        }
+      }
+
+      if (mode === "llm") summarized++;
+      else if (mode === "heuristic") heuristic++;
+      report.push(`  ✂️ #${row.id} [${mode}] ${original.length} → ${newSummary.length} chars`);
+    }
+
+    result = { summarized, heuristic, skipped, processed: rows.length, report };
+  } finally {
+    try { db.close(); } catch {}
+  }
+  return result;
+}
+
 // ---- 项目活跃度分析 ----
 function generateProjectSuggestions() {
   const suggestions = [];
@@ -158,15 +248,30 @@ function generateProjectSuggestions() {
 }
 
 // ---- 运行完整梦境 ----
-function runDream(opts = {}) {
-  const { dryRun = false } = opts;
+async function runDream(opts = {}) {
+  const { dryRun = false, skipLlm = false } = opts;
   const report = [];
   let totalMerged = 0, totalArchived = 0;
 
   report.push("# 🌙 梦境整理报告");
   report.push("");
   report.push(`> 运行时间: ${new Date().toLocaleString("zh-CN")}`);
-  report.push(`> 模式: ${dryRun ? "🔍 预览" : "✅ 执行"}`);
+  report.push(`> 模式: ${dryRun ? "🔍 预览" : "✅ 执行"}${skipLlm ? " (🚫 LLM skipped, heuristic only)" : ""}`);
+  report.push("");
+
+  // L2 — LLM 摘要长 episodes
+  report.push("## L2 情节记忆摘要");
+  try {
+    const l2 = await summarizeLongEpisodes({ skipLlm, dryRun });
+    if (!l2 || l2.processed === 0) {
+      report.push("  ⏭️ 无长 summary (>200 chars) 需要处理");
+    } else {
+      report.push(`  📊 处理 ${l2.processed} 条: LLM 摘要 ${l2.summarized} / Heuristic 降级 ${l2.heuristic} / 跳过 ${l2.skipped}`);
+      if (l2.report && l2.report.length > 0) report.push(...l2.report.slice(0, 10));  // 限 10 条避免报告过长
+    }
+  } catch (err) {
+    report.push(`  ❌ L2 摘要失败: ${err.message}`);
+  }
   report.push("");
 
   // L3
@@ -243,8 +348,9 @@ function runDream(opts = {}) {
 // ---- CLI ----
 if (require.main === module) {
   const isDry = process.argv.includes("--dry-run") || process.argv.includes("--preview");
+  const skipLlm = process.argv.includes("--dream-skip-llm") || process.argv.includes("--skip-llm");
   console.log(isDry ? "🔍 预览模式..." : "🌙 运行梦境整理...");
-  console.log(runDream({ dryRun: isDry }));
+  runDream({ dryRun: isDry, skipLlm }).then(r => console.log(r)).catch(e => console.error(e));
 }
 
-module.exports = { runDream, textSimilarity };
+module.exports = { runDream, textSimilarity, summarizeLongEpisodes, heuristicSummary };
